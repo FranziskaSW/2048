@@ -135,6 +135,8 @@ class MinmaxAgent(MultiAgentSearchAgent):
         game_state.generate_successor(agent_index, action):
             Returns the successor game state after an agent takes an action
         """
+        # TODO: depth 3 minimax value should be 16 but is 12 - why?
+
         values = np.zeros(4)
         actions = [0] * 4
         for i, act in enumerate(np.random.permutation(game_state.get_legal_actions(agent_index=0))):
@@ -152,11 +154,39 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
     """
+    def max_value(self, game_state, alpha, beta, depth, a_idx=0):
+        if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
+            return self.evaluation_function(game_state)
+        for act in game_state.get_legal_actions(agent_index=a_idx):
+            successor = game_state.generate_successor(agent_index=a_idx, action=act)
+            print("max: before ", alpha, beta, "give to min")
+            alpha = max(alpha, self.min_value(successor, alpha, beta, depth-1))
+            print("max: ", alpha, beta)
+            if alpha >= beta:
+                return alpha
+        return alpha
+        return value
+
+    def min_value(self, game_state, alpha, beta, depth, a_idx=1):
+        if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
+            return self.evaluation_function(game_state)
+        for act in game_state.get_legal_actions(agent_index=a_idx):
+            successor = game_state.generate_successor(agent_index=a_idx, action=act)
+            beta = min(beta, self.max_value(successor, alpha, beta, depth-1))
+            print("min: ", alpha, beta)
+            if beta <= alpha:
+                return beta
+        return beta
 
     def get_action(self, game_state):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
+        # TODO: need to save the value to the state somehow, so that I can decide which action the best value (alpha, beta) came from
+        alpha = -np.inf
+        beta = np.inf
+        value = self.max_value(game_state, alpha, beta, 2)
+        print(value)
         """*** YOUR CODE HERE ***"""
         util.raiseNotDefined()
 
