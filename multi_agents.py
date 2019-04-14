@@ -65,6 +65,13 @@ def score_evaluation_function(current_game_state):
     """
     return current_game_state.score
 
+    # board = current_game_state.board
+    # rows = abs(board[:, 1:] - board[:, :-1]).sum(axis=1)
+    # cols = abs(board[1:, :] - board[:-1, :]).sum(axis=0)
+    # smoothness = rows.sum() + cols.sum()  # smaller value is better
+    # empty = sum(board == 0).sum()
+    # return 10000 - smoothness + empty * 100
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -91,6 +98,26 @@ class MultiAgentSearchAgent(Agent):
 
 
 class MinmaxAgent(MultiAgentSearchAgent):
+
+    def max_value(self, game_state, depth, a_idx=0):
+        if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
+            return self.evaluation_function(game_state)
+        value = -np.inf
+        for act in game_state.get_legal_actions(agent_index=a_idx):
+            successor = game_state.generate_successor(agent_index=a_idx, action=act)
+            value = max(value, self.min_value(successor, depth-1))
+        return value
+
+
+    def min_value(self, game_state, depth, a_idx=1):
+        if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
+            return self.evaluation_function(game_state)
+        value = np.inf
+        for act in game_state.get_legal_actions(agent_index=a_idx):
+            successor = game_state.generate_successor(agent_index=a_idx, action=act)
+            value = min(value, self.max_value(successor, depth-1))
+        return value
+
     def get_action(self, game_state):
         """
         Returns the minimax action from the current gameState using self.depth
@@ -108,9 +135,17 @@ class MinmaxAgent(MultiAgentSearchAgent):
         game_state.generate_successor(agent_index, action):
             Returns the successor game state after an agent takes an action
         """
-        """*** YOUR CODE HERE ***"""
-        util.raiseNotDefined()
+        values = np.zeros(4)
+        actions = [0] * 4
+        for i, act in enumerate(np.random.permutation(game_state.get_legal_actions(agent_index=0))):
+            successor = game_state.generate_successor(agent_index=0, action=act)
+            values[i] = self.min_value(game_state=successor, depth=self.depth)
+            actions[i] = act
 
+        act_idx = np.argmax(values)
+        action = actions[act_idx]
+
+        return action
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
