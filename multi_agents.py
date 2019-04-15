@@ -148,36 +148,42 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def max_value(self, game_state, alpha, beta, depth, a_idx=0):
         if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
             return self.evaluation_function(game_state)
+        v = -np.inf
         for act in game_state.get_legal_actions(agent_index=a_idx):
             successor = game_state.generate_successor(agent_index=a_idx, action=act)
-            print("max: before ", alpha, beta, "give to min")
-            alpha = max(alpha, self.min_value(successor, alpha, beta, depth-1))
-            print("max: ", alpha, beta)
-            if alpha >= beta:
-                return alpha
-        return alpha
-        return value
+            v = max(v, self.min_value(successor, alpha, beta, depth-1))
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
 
     def min_value(self, game_state, alpha, beta, depth, a_idx=1):
         if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
             return self.evaluation_function(game_state)
+        v = np.inf
         for act in game_state.get_legal_actions(agent_index=a_idx):
             successor = game_state.generate_successor(agent_index=a_idx, action=act)
-            beta = min(beta, self.max_value(successor, alpha, beta, depth-1))
-            print("min: ", alpha, beta)
-            if beta <= alpha:
-                return beta
-        return beta
+            v = min(v, self.max_value(successor, alpha, beta, depth-1))
+            if v <= alpha:
+                return v
+            beta = min(v, beta)
+        return v
 
     def get_action(self, game_state):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        # TODO: need to save the value to the state somehow, so that I can decide which action the best value (alpha, beta) came from
-        alpha = -np.inf
-        beta = np.inf
-        value = self.max_value(game_state, alpha, beta, 2)
-        print(value)
+        values = np.zeros(4)
+        actions = [0] * 4
+        for i, act in enumerate(np.random.permutation(game_state.get_legal_actions(agent_index=0))):
+            successor = game_state.generate_successor(agent_index=0, action=act)
+            values[i] = self.min_value(successor, - np.inf, np.inf, self.depth*2-1)
+            actions[i] = act
+
+        act_idx = np.argmax(values)
+        action = actions[act_idx]
+
+        return action
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
