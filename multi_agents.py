@@ -55,6 +55,7 @@ class ReflexAgent(Agent):
         empty = sum(board == 0).sum()
         return 10000-smoothness + empty*100
 
+
 def score_evaluation_function(current_game_state):
     """
     This default evaluation function just returns the score of the state.
@@ -64,13 +65,6 @@ def score_evaluation_function(current_game_state):
     (not reflex agents).
     """
     return current_game_state.score
-
-    # board = current_game_state.board
-    # rows = abs(board[:, 1:] - board[:, :-1]).sum(axis=1)
-    # cols = abs(board[1:, :] - board[:-1, :]).sum(axis=0)
-    # smoothness = rows.sum() + cols.sum()  # smaller value is better
-    # empty = sum(board == 0).sum()
-    # return 10000 - smoothness + empty * 100
 
 
 class MultiAgentSearchAgent(Agent):
@@ -108,7 +102,6 @@ class MinmaxAgent(MultiAgentSearchAgent):
             value = max(value, self.min_value(successor, depth-1))
         return value
 
-
     def min_value(self, game_state, depth, a_idx=1):
         if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
             return self.evaluation_function(game_state)
@@ -135,13 +128,11 @@ class MinmaxAgent(MultiAgentSearchAgent):
         game_state.generate_successor(agent_index, action):
             Returns the successor game state after an agent takes an action
         """
-        # TODO: depth 3 minimax value should be 16 but is 12 - why?
-
         values = np.zeros(4)
         actions = [0] * 4
         for i, act in enumerate(np.random.permutation(game_state.get_legal_actions(agent_index=0))):
             successor = game_state.generate_successor(agent_index=0, action=act)
-            values[i] = self.min_value(game_state=successor, depth=self.depth)
+            values[i] = self.min_value(game_state=successor, depth=self.depth*2-1)
             actions[i] = act
 
         act_idx = np.argmax(values)
@@ -187,9 +178,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         beta = np.inf
         value = self.max_value(game_state, alpha, beta, 2)
         print(value)
-        """*** YOUR CODE HERE ***"""
-        util.raiseNotDefined()
-
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -208,17 +196,18 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         util.raiseNotDefined()
 
 
-
-
-
 def better_evaluation_function(current_game_state):
     """
     Your extreme 2048 evaluation function (question 5).
 
     DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    board = current_game_state.board
+    rows = abs(board[:, 1:] - board[:, :-1]).sum(axis=1)
+    cols = abs(board[1:, :] - board[:-1, :]).sum(axis=0)
+    smoothness = rows.sum() + cols.sum()  # smaller value is better
+    empty = sum(board == 0).sum()
+    return 10000 - smoothness + empty * 100
 
 
 # Abbreviation
