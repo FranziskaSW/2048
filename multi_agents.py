@@ -234,24 +234,20 @@ def better_evaluation_function(current_game_state):
     DESCRIPTION:
     (1) smoothness
     (2) empty tiles
-    (3) sorted
-    https://stackoverflow.com/questions/22342854/what-is-the-optimal-algorithm-for-the-game-2048
+    (3) merges
     """
     board = current_game_state.board
     rows = abs(board[:, 1:] - board[:, :-1]).sum(axis=1)
     cols = abs(board[1:, :] - board[:-1, :]).sum(axis=0)
     smoothness = rows.sum() + cols.sum()  # smaller value is better
 
-    empty = sum(board == 0).sum() / board.size
+    empty = sum(board == 0).sum()
 
-    sorted = 0
+    merges = 0
     for i in range(board.shape[0]):
-        row = np.diff(board[i, :])
-        column = np.diff(board[:, i])
-        sorted += int(all(row >= 0) or all(row <= 0)) + int(all(column >= 0) or all(column <= 0))
-    sorted /= sum(board.shape)
+        merges += sum(np.diff(board[i, :]) == 0) + sum(np.diff(board[:, i]) == 0)
 
-    return 10000 -smoothness + 100*empty + 20*sorted
+    return 10000 - smoothness + 100 * empty + 20 * merges
 
 
 # Abbreviation
