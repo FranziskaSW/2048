@@ -190,6 +190,23 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     """
     Your expectimax agent (question 4)
     """
+    def max_value(self, game_state, depth, a_idx=0):
+        if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
+            return self.evaluation_function(game_state)
+        value = -np.inf
+        for act in game_state.get_legal_actions(agent_index=a_idx):
+            successor = game_state.generate_successor(agent_index=a_idx, action=act)
+            value = max(value, self.mean_value(successor, depth-1))
+        return value
+
+    def mean_value(self, game_state, depth, a_idx=1):
+        if depth == 0 or (len(game_state.get_legal_actions(agent_index=a_idx)) == 0):
+            return self.evaluation_function(game_state)
+        values = []
+        for act in game_state.get_legal_actions(agent_index=a_idx):
+            successor = game_state.generate_successor(agent_index=a_idx, action=act)
+            values.append(self.max_value(successor, depth-1))
+        return np.mean(values)
 
     def get_action(self, game_state):
         """
@@ -198,22 +215,43 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         The opponent should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        """*** YOUR CODE HERE ***"""
-        util.raiseNotDefined()
+        values = np.zeros(4)
+        actions = [0] * 4
+        for i, act in enumerate(np.random.permutation(game_state.get_legal_actions(agent_index=0))):
+            successor = game_state.generate_successor(agent_index=0, action=act)
+            values[i] = self.mean_value(successor, self.depth*2-1)
+            actions[i] = act
+
+        act_idx = np.argmax(values)
+        action = actions[act_idx]
+        return action
 
 
 def better_evaluation_function(current_game_state):
     """
     Your extreme 2048 evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION:
+    (1) smoothness
+    (2) empty tiles
+    (3) sorted
+    https://stackoverflow.com/questions/22342854/what-is-the-optimal-algorithm-for-the-game-2048
     """
     board = current_game_state.board
     rows = abs(board[:, 1:] - board[:, :-1]).sum(axis=1)
     cols = abs(board[1:, :] - board[:-1, :]).sum(axis=0)
     smoothness = rows.sum() + cols.sum()  # smaller value is better
-    empty = sum(board == 0).sum()
-    return 10000 - smoothness + empty * 100
+
+    empty = sum(board == 0).sum() / board.size
+
+    sorted = 0
+    for i in range(board.shape[0]):
+        row = np.diff(board[i, :])
+        column = np.diff(board[:, i])
+        sorted += int(all(row >= 0) or all(row <= 0)) + int(all(column >= 0) or all(column <= 0))
+    sorted /= sum(board.shape)
+
+    return 10000 -smoothness + 100*empty + 20*sorted
 
 
 # Abbreviation
