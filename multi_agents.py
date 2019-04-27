@@ -235,7 +235,7 @@ def better_evaluation_function(current_game_state):
     (1) smoothness - we "derive" rows and columns (by subtract an element from its neighbor).
                      we will prefer smaller smoothness which means neighbors elements are close to each other, so that
                      there are more chances they will be combined.
-    (2) empty tiles - a board with more empty tails allows more flexibility of movement and strongly
+    (2) empty tiles - a board with more empty tiles allows more flexibility of movement and strongly
                       connected to blocking
     (3) merges - we will prefer a state in which there are more potentials merges.
 
