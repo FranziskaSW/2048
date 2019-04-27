@@ -232,9 +232,12 @@ def better_evaluation_function(current_game_state):
     Your extreme 2048 evaluation function (question 5).
 
     DESCRIPTION:
-    (1) smoothness
-    (2) empty tiles
-    (3) merges
+    (1) smoothness - we "derive" rows and columns (by subtract an element from its neighbor).
+                     we will prefer smaller smoothness which means neighbors elements are close to each other, so that
+                     there are more chances they will be combined.
+    (2) empty tiles - a board with more empty tails allows more flexibility of movement and strongly connected to how
+                      far is the end of game.
+    (3) merges - we will prefer a state in which there are more potentials merges.
     """
     board = current_game_state.board
     rows = abs(board[:, 1:] - board[:, :-1]).sum(axis=1)
