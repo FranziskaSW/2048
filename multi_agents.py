@@ -273,7 +273,7 @@ def better_evaluation_function(current_game_state):
                             board[0, -1] == max_tile,
                             board[-1, -1] == max_tile])
 
-    return 10000 - smoothness + 150 * empty + 50 * merges + 50 * highest_in_corner
+    return 10000 - smoothness + 100 * empty + 20 * merges + 100 * highest_in_corner
 
 # Abbreviation
 better = better_evaluation_function
