@@ -238,6 +238,8 @@ def better_evaluation_function(current_game_state):
     (2) empty tiles - a board with more empty tiles allows more flexibility of movement and strongly
                       connected to blocking
     (3) merges - we will prefer a state in which there are more potentials merges.
+    (4) highest_in_corner - we will prefer a state in which the highest tile is in the corner of the board.
+
     see the `return` statement to understand how we linearly combined all the above features.
     """
     board = current_game_state.board
@@ -248,11 +250,30 @@ def better_evaluation_function(current_game_state):
     empty = sum(board == 0).sum()
 
     merges = 0
+
     for i in range(board.shape[0]):
-        merges += sum(np.diff(board[i, :]) == 0) + sum(np.diff(board[:, i]) == 0)
+        row_i = board[i, (board != 0)[i,:]]
+        if len(row_i) > 1:
+            merge_i = sum(np.diff(row_i)==0)
 
-    return 10000 - smoothness + 100 * empty + 20 * merges
+        col_j = board[(board != 0)[:,i], i]
+        if len(col_j) > 1:
+            merge_j = sum((col_j[1:] - col_j[:-1])==0)
 
+        if (len(row_i) > 1) and (len(col_j) > 1):
+            merges += merge_i + merge_j
+        elif (len(row_i) > 1) and (len(col_j) <= 1):
+            merges += merge_i
+        elif (len(row_i) <= 1) and (len(col_j) > 1):
+            merges += merge_j
+
+    max_tile = np.log2(current_game_state.max_tile)
+    highest_in_corner = any([board[0,0] == max_tile,
+                            board[-1, 0] == max_tile,
+                            board[0, -1] == max_tile,
+                            board[-1, -1] == max_tile])
+
+    return 10000 - smoothness + 100 * empty + 200 * merges + 50 * highest_in_corner
 
 # Abbreviation
 better = better_evaluation_function
