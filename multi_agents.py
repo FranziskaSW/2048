@@ -173,7 +173,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        values = np.zeros(4)
+        values = np.ones(4) * -np.inf
         actions = [0] * 4
         for i, act in enumerate(np.random.permutation(game_state.get_legal_actions(agent_index=0))):
             successor = game_state.generate_successor(agent_index=0, action=act)
@@ -215,7 +215,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         The opponent should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        values = np.zeros(4)
+        values = np.ones(4) * -np.inf
         actions = [0] * 4
         for i, act in enumerate(np.random.permutation(game_state.get_legal_actions(agent_index=0))):
             successor = game_state.generate_successor(agent_index=0, action=act)
@@ -224,13 +224,13 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
         act_idx = np.argmax(values)
         action = actions[act_idx]
+
         return action
 
 
 def better_evaluation_function(current_game_state):
     """
     Your extreme 2048 evaluation function (question 5).
-
     DESCRIPTION:
     (1) smoothness - we "derive" rows and columns (by subtract an element from its neighbor).
                      we will prefer smaller smoothness which means neighbors elements are close to each other, so that
@@ -238,7 +238,6 @@ def better_evaluation_function(current_game_state):
     (2) empty tiles - a board with more empty tiles allows more flexibility of movement and strongly
                       connected to blocking
     (3) merges - we will prefer a state in which there are more potentials merges.
-
     see the `return` statement to understand how we linearly combined all the above features.
     """
     board = current_game_state.board
